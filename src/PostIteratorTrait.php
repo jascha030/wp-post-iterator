@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Jascha030\ComposerTemplate;
+namespace Jascha030\WpPostIterator;
 
 use WP_Query;
 
