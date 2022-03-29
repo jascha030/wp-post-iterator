@@ -2,7 +2,7 @@
 
 namespace Jascha030\ComposerTemplate;
 
-class PostIteratorAbstract
+trait PostIteratorTrait
 {
 
 }
