@@ -2,20 +2,33 @@
   "name": "jascha030/wp-post-iterator",
   "description": "Simple adapter for the WP_Query class, built mainly for, but not limited to usage with twig/twig.",
   "license": "GPL-2.0+",
-  "minimum-stability": "stable",
-  "autoload": {
-    "psr-4": {
-      "Jascha030\\WpPostIterator\\": "src/"
-    }
-  },
-  "require-dev": {
-    "friendsofphp/php-cs-fixer": "^3.8",
-    "roave/security-advisories": "dev-latest"
-  },
   "authors": [
     {
       "name": "Jascha030",
       "email": "contact@jaschavanaalst.nl"
     }
-  ]
+  ],
+  "autoload": {
+    "psr-4": {
+      "Jascha030\\WpPostIterator\\": "src/"
+    }
+  },
+  "minimum-stability": "stable",
+  "require-dev": {
+    "friendsofphp/php-cs-fixer": "^3.8",
+    "roots/wordpress": "^5.9",
+    "roave/security-advisories": "dev-latest"
+  },
+  "extra": {
+    "wordpress-install-dir": ".wp/"
+  },
+  "scripts": {
+    "php-cs-fixer": "php-cs-fixer fix --config=.php-cs-fixer.dist.php",
+    "format": "@php-cs-fixer"
+  },
+  "config": {
+    "allow-plugins": {
+      "roots/wordpress-core-installer": true
+    }
+  }
 }
