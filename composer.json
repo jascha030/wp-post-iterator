@@ -17,7 +17,8 @@
   "require-dev": {
     "friendsofphp/php-cs-fixer": "^3.8",
     "roots/wordpress": "^5.9",
-    "roave/security-advisories": "dev-latest"
+    "roave/security-advisories": "dev-latest",
+    "symfony/var-dumper": "^6.0"
   },
   "extra": {
     "wordpress-install-dir": ".wp/"
