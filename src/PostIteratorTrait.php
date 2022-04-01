@@ -25,11 +25,7 @@ trait PostIteratorTrait
 
     public function current(): ?\WP_Post
     {
-        if (! isset($this->post)) {
-            $this->getQuery()->the_post();
-        }
-
-        return $this->getQuery()->post;
+        return $this->getQuery()->post = $this->getQuery()->posts[$this->getQuery()->current_post + 1];
     }
 
     public function next(): int|\WP_Post|null
