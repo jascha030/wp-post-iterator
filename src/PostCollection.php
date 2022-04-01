@@ -39,7 +39,7 @@ class PostCollection implements IteratorAggregate
      */
     public static function fromQueryArgs(array $args, bool $keyByPostId = false): PostCollection
     {
-        return new static(fn () => (new PostIteratorAdapter(new \WP_Query($args)))->keyByPostId($keyByPostId));
+        return new static((static fn (): Generator => yield from (new PostIteratorAdapter(new \WP_Query($args)))->keyByPostId($keyByPostId))());
     }
 
     /**
@@ -47,11 +47,7 @@ class PostCollection implements IteratorAggregate
      */
     public static function fromQuery(WP_Query $query, bool $keyByPostId = false): PostCollection
     {
-        return new static(
-            function () use ($query, $keyByPostId) {
-                yield from (new PostIteratorAdapter($query))->keyByPostId($keyByPostId);
-            }
-        );
+        return new static((static fn (): Generator => yield from (new PostIteratorAdapter($query))->keyByPostId($keyByPostId))());
     }
 
     public static function fromLoop(bool $keyByPostId = false): PostCollection
@@ -61,7 +57,10 @@ class PostCollection implements IteratorAggregate
 
             while (have_posts()) {
                 the_post();
-                yield from (static fn () => $keyByPostId ? yield $post->ID => $post : yield $post)();
+
+                yield from (static fn () => $keyByPostId
+                    ? yield $post->ID    => $post
+                    : yield $post)();
             }
         });
     }
