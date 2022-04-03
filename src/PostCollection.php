@@ -50,6 +50,9 @@ class PostCollection implements IteratorAggregate
         return new static((static fn (): Generator => yield from (new PostIteratorAdapter($query))->keyByPostId($keyByPostId))());
     }
 
+    /**
+     * Create instance inside a globally accessible post loop.
+     */
     public static function fromLoop(bool $keyByPostId = false): PostCollection
     {
         return new static(static function () use ($keyByPostId) {
@@ -58,9 +61,11 @@ class PostCollection implements IteratorAggregate
             while (have_posts()) {
                 the_post();
 
-                yield from (static fn () => $keyByPostId
-                    ? yield $post->ID    => $post
-                    : yield $post)();
+                yield from (
+                    static fn ()          => $keyByPostId
+                        ? yield $post->ID => $post
+                        : yield $post
+                )();
             }
         });
     }
