@@ -24,90 +24,129 @@ composer require jascha030/composer-template
 Require the `vendor/autoload.php` file either in your main plugin file, or functions.php, depending on what you are
 building.
 
-### The main implementation
+### The most effective way to use it
+
+The simplest and most effective way to use this package is by using the `PostCollection` class. It's based around Php's
+IteratorAggregate interface and inspired by (e.g.) Laravel's Collection class and Symfony's Finder and LazyIterator
+classes.
+
+It provides three static methods to create instances from various types of arguments.
 
 ```php
 <?php
 
-declare(strict_types=1);
+/**
+ * Create instance from any arguments you would pass to a WP_Query.
+ */
+public static function fromQueryArgs(array $args, bool $keyByPostId = false): PostCollection
 
-namespace Jascha030\WpPostIterator;
+/**
+ * Create instance from an existing WP_Query instance.
+ */
+public static function fromQuery(WP_Query $query, bool $keyByPostId = false): PostCollection
+
+/**
+ * Create instance inside a globally accessible post loop.
+ */
+public static function fromLoop(bool $keyByPostId = false): PostCollection
+```
+
+### Examples using PostCollection
+
+```php
+<?php
+
+// Require Composer's autoloader
+require_once __DIR__ . '/vendor/autoload.php';
+
+$args = [
+    'post_type' => 'post',
+    'posts_per_page' => -1,
+    'post_status' => 'publish'
+];
+
+// Create from arguments you would pass to a WP_Query instance (Recommended).
+$fromArgs = \Jascha030\WpPostIterator\PostCollection::fromQueryArgs($args);
+
+// Or from an existing instance.
+$query = new WP_Query($args);
+$fromQuery = \Jascha030\WpPostIterator\PostCollection::fromQuery($query);
+```
+
+The point of this class is you are able to loop through it, like you would with an array, only it is more memory
+friendly than an actual array.
+
+```php
+<?php
+
+$collection = \Jascha030\WpPostIterator\PostCollection::fromQueryArgs($args);
+
+foreach($collection as $post) {
+    echo "<h1>{$post->post_title}</h1>";
+    
+    echo "<p>{$post->post_content}</p>";
+}
+
+```
+
+### The main implementation
+
+```php
+<?php
 
 /**
  * Simple implementation, extends WP_Query and uses its methods to implement the Iterator interface.
  */
 class PostIterator extends \WP_Query implements \Iterator
 {
-    private bool $keyByPostId;
-
     public function __construct($query = '')
-    {
-        $this->keyByPostId = false;
-
-        parent::__construct($query);
-    }
 
     /**
      * Tells the `key` method whether we should return the post ID when called.
      * If so, this doesn't necessarily mean the posts would be ordered ID.
      */
     final public function keyByPostId(bool $enabled = true): \Iterator
-    {
-        $this->keyByPostId = $enabled;
 
-        return $this;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public function current(): ?\WP_Post
-    {
-        if (! isset($this->post)) {
-            $this->the_post();
-        }
 
-        return $this->post;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public function next()
-    {
-        return $this->next_post();
-    }
 
-    /**
-     * {@inheritDoc}
-     */
     public function key(): ?int
-    {
-        if (0 === $this->post_count) {
-            return null;
-        }
 
-        return $this->keyByPostId
-            ? $this->current_post
-            : $this->post->ID;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public function valid(): bool
-    {
-        return $this->have_posts();
-    }
+
+    public function rewind(): void
+}
+```
+
+### Adapter
+
+If you want to create an iterator for an existing `WP_Query` instance use the `PostIteratorAdapter` class. It uses
+the `PostIteratorTrait`.
+
+```php
+<?php
+
+class PostIteratorAdapter implements \Iterator
+{
+    use PostIteratorTrait;
+
+    public function __construct(WP_Query $query)
 
     /**
-     * {@inheritDoc}
+     * Provide a WP_Query object to defer our calls to.
      */
-    public function rewind(): void
-    {
-        $this->rewind_posts();
-    }
+    private function getQuery(): WP_Query
+    
+    /**
+     * Tells the `key` method whether we should return the post ID when called.
+     * If so, this doesn't necessarily mean the posts would be ordered ID.
+     */
+    private function keyedByPostIds(): bool
+
+    final public function keyByPostId(bool $enabled = true): \Iterator
 }
+
 ```
 
 ### Alternative
